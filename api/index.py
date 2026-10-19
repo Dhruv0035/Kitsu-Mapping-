@@ -21,8 +21,7 @@ UPSTREAM_ADDONS = [
 # Manual override fallback for brand-new seasonal anime if mapping fails
 # Format: "kitsu_id": ("tmdb_id", "season_number")
 MANUAL_OVERRIDES = {
-    "48123": ("114410", "4"),  # Bleach TYBW Part 4 -> TMDB Season 4
-    "49222": ("113988", "2")   # Frieren Season 2 -> TMDB Season 2
+    
 }
 
 @app.get("/manifest.json")
