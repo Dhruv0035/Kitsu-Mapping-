@@ -15,7 +15,7 @@ app.add_middleware(
 # Paste your HTTP addon base URLs here (everything BEFORE /manifest.json)
 # Do NOT put a trailing slash "/" at the end of the URLs
 UPSTREAM_ADDONS = [
-    "https://your-penguplay-addon-url.workers.dev" # Replace with your PenguPlay URL
+    "https://pengu.uk/%7B%22auth_token%22%3A%22AbDWpMr0T1rs81OOaEfXF6oZQVs3ofjH5a-H1RE78QA%22%7D" # Replace with your PenguPlay URL
 ]
 
 @app.get("/manifest.json")
