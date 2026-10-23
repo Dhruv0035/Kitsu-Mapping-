@@ -14,8 +14,10 @@ app.add_middleware(
 )
 
 # Fetch securely from Vercel Environment Variables
-PENGU_SECRET_URL = os.environ.get("PENGU_URL")
-UPSTREAM_ADDONS = [PENGU_SECRET_URL] if PENGU_SECRET_URL else []
+UPSTREAM_ADDONS = []
+for key, value in os.environ.items():
+    if key.startswith("ADDON_"):
+        UPSTREAM_ADDONS.append(value)
 
 @app.get("/")
 async def root():
