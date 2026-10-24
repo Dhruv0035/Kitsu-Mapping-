@@ -17,10 +17,15 @@ app.add_middleware(
 # Fetch securely from Vercel Environment Variables
 UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HTML_PATH = os.path.join(BASE_DIR, "index.html")
+MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"status": "Kitsu Proxy is running", "manifest": "/manifest.json"}
+    if os.path.exists(HTML_PATH):
+        return FileResponse(HTML_PATH)
+    return HTMLResponse(content="<h1>Kitsu Proxy is running</h1><p>index.html not found inside api folder.</p>", status_code=404)
 
 @app.get("/manifest.json")
 async def get_manifest():
