@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kitsu Proxy</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #131921;
+                color: #fff;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .card {
+                background: #1b2430;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+                text-align: center;
+                max-width: 400px;
+            }
+            .status {
+                color: #2ec4b6;
+                font-weight: bold;
+            }
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 25px;
+            }
+            .btn {
+                display: block;
+                padding: 12px 24px;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: bold;
+                transition: opacity 0.2s;
+            }
+            .btn:hover {
+                opacity: 0.9;
+            }
+            .btn-install {
+                background-color: #7f5af0;
+            }
+            .btn-manifest {
+                background-color: #4a5568;
+                font-size: 0.9em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>Kitsu Proxy</h1>
+            <p>Stremio addon to map Kitsu catalog to IMDB for addons requiring IMDB ID</p>
+            
+            <div class="btn-group">
+                <a id="installBtn" href="#" class="btn btn-install">Install Addon</a>
+                <a href="/manifest.json" class="btn btn-manifest">View JSON Manifest</a>
+            </div>
+        </div>
+
+        <script>
+            const currentHost = window.location.host; 
+            const stremioUrl = `stremio://${currentHost}/manifest.json`;
+            document.getElementById("installBtn").href = stremioUrl;
+        </script>
+    </body>
+</html>
