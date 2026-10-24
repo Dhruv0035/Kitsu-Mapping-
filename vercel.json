@@ -1,12 +1,8 @@
 {
-  "version": 2,
   "builds": [
     { "src": "api/index.py", "use": "@vercel/python" }
   ],
-  "routes": [
-    { "src": "/", "dest": "/public/index.html" },
-    { "src": "/manifest.json", "dest": "/public/manifest.json" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "api/index.py" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index.py" }
   ]
 }
