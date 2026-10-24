@@ -1,8 +1,10 @@
 {
+  "cleanUrls": true,
   "builds": [
     { "src": "api/index.py", "use": "@vercel/python" }
   ],
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index.py" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "api/index.py" }
   ]
 }
