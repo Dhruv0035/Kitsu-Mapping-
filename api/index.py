@@ -15,10 +15,8 @@ app.add_middleware(
 )
 
 # Fetch securely from Vercel Environment Variables
-UPSTREAM_ADDONS = []
-for key, value in os.environ.items():
-    if key.startswith("ADDON_"):
-        UPSTREAM_ADDONS.append(value)
+UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
+
 
 @app.get("/")
 async def root():
@@ -71,6 +69,9 @@ async def resolve_kitsu_id(client: httpx.AsyncClient, kitsu_id: str, ep_num: str
     imdb_id = mappings.get("imdb_id")
 
     if not mappings:
+        return None
+
+    if not imdb_id:
         return None
 
     if mappings.get("type") == "MOVIE":
