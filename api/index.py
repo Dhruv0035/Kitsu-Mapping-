@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import asyncio
 import os
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -19,9 +20,13 @@ for key, value in os.environ.items():
     if key.startswith("ADDON_"):
         UPSTREAM_ADDONS.append(value)
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"status": "Kitsu Proxy is running", "manifest": "/manifest.json"}
+    try:
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "<h1>Kitsu Proxy is running</h1><p>index.html not found</p>"
 
 @app.get("/manifest.json")
 async def get_manifest():
