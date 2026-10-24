@@ -32,18 +32,6 @@ async def manifest():
 async def health_check():
     return {"status": "Kitsu Proxy backend is operational"}
 
-@app.get("/manifest.json")
-async def get_manifest():
-    return {
-        "id": "org.custom.kitsu2http.proxy",
-        "version": "1.0.0",
-        "name": "Kitsu HTTP Proxy",
-        "description": "Translates Kitsu IDs into IMDb SxxExx for HTTP Addons",
-        "resources": ["stream"],
-        "types": ["anime", "series", "movie"],
-        "idPrefixes": ["kitsu"]
-    }
-
 async def get_mal_id_from_kitsu(client: httpx.AsyncClient, kitsu_id: str):
     """Fetches the MyAnimeList ID directly from Kitsu's official API."""
     try:
