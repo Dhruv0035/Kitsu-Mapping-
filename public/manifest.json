@@ -1,0 +1,9 @@
+{
+  "id": "org.custom.kitsu2http.proxy",
+  "version": "1.0.0",
+  "name": "Kitsu HTTP Proxy",
+  "description": "Translates Kitsu IDs into IMDb SxxExx for HTTP Addons",
+  "resources": ["stream"],
+  "types": ["anime", "series", "movie"],
+  "idPrefixes": ["kitsu"]
+}
