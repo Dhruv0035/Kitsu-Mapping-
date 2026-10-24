@@ -1,10 +1,8 @@
 {
   "cleanUrls": true,
-  "builds": [
-    { "src": "api/index.py", "use": "@vercel/python" }
-  ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "api/index.py" }
+  "rewrites": [
+    { "source": "/", "destination": "/public/index.html" },
+    { "source": "/manifest.json", "destination": "/public/manifest.json" },
+    { "source": "/(.*)", "destination": "/api/index.py" }
   ]
 }
