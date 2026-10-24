@@ -17,9 +17,9 @@ app.add_middleware(
 # Fetch securely from Vercel Environment Variables
 UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
 
-@app.get("/")
-async def root():
-    return {"status": "Kitsu Proxy is running", "manifest": "/manifest.json"}
+@app.get("/health")
+async def health_check():
+    return {"status": "Kitsu Proxy backend is operational"}
 
 @app.get("/manifest.json")
 async def get_manifest():
