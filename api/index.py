@@ -133,7 +133,7 @@ async def get_stream(media_type: str, item_id: str):
         else:
             # Fallback to AniZip routing if no override exists
             resolved = await resolve_kitsu_id(client, kitsu_id, ep_num)
-            if resolved and resolved.get("imdb":
+            if resolved and resolved.get("imdb"):
                 target_type = resolved["type"]
                 for addon_url in UPSTREAM_ADDONS:
                     tasks.append(fetch_upstream(client, addon_url, target_type, resolved["imdb"]))
