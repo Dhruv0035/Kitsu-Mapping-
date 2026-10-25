@@ -20,22 +20,22 @@ app.add_middleware(
 # Fetch securely from Vercel Environment Variables
 UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 2. Load manual overrides once during server cold start (using safe absolute path)
-overrides_path = BASE_DIR / "overrides.json"
+overrides_path = os.path.join(BASE_DIR, "overrides.json")
 try:
-    MANUAL_OVERRIDES = json.loads(overrides_path.read_text())
-except FileNotFoundError:
+    with open(overrides_path, "r", encoding="utf-8") as f:
+        MANUAL_OVERRIDES = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
     MANUAL_OVERRIDES = {}
 
 @app.get("/")
 async def root():
-    return FileResponse(BASE_DIR / "index.html")
+    return FileResponse(os.path.join(BASE_DIR, "index.html"))
 
 @app.get("/manifest.json")
 async def manifest():
-    return FileResponse(BASE_DIR / "manifest.json")
+    return FileResponse(os.path.join(BASE_DIR, "manifest.json"))
 
 @app.get("/health")
 async def health_check():
