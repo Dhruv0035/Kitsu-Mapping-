@@ -4,22 +4,22 @@
       "includeFiles": "api/overrides.json"
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/stream/(.*)",
-      "destination": "/api/index.py/stream/$1"
+      "src": "/stream/(.*)",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/health",
-      "destination": "/api/index.py/health"
+      "src": "/health",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/manifest.json",
-      "destination": "/manifest.json"
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
     },
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "/",
+      "dest": "/index.html"
     }
   ]
 }
