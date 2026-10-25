@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "api/overrides.json"
+    }
+  },
   "rewrites": [
     {
       "source": "/stream/(.*)",
