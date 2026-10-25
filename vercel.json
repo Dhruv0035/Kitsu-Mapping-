@@ -4,7 +4,7 @@
       "src": "api/index.py", 
       "use": "@vercel/python",
       "config": {
-        "includeFiles": ["api/index.html", "api/manifest.json"]
+        "includeFiles": ["api/index.html", "api/manifest.json", "api/overrides.json"]
       }
     }
   ],
