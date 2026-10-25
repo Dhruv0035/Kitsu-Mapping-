@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/stream/(.*)",
-      "destination": "/api/index.py"
+      "destination": "/api/index.py/stream/$1"
     },
     {
-      "source": "/health(.*)",
-      "destination": "/api/index.py"
+      "source": "/health",
+      "destination": "/api/index.py/health"
     },
     {
       "source": "/manifest.json",
