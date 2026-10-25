@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import asyncio
 import os
+from pathlib import Path
 from fastapi.responses import HTMLResponse
 from fastapi.responses import FileResponse
+import json
 
 app = FastAPI()
 
@@ -18,15 +20,22 @@ app.add_middleware(
 # Fetch securely from Vercel Environment Variables
 UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent
+
+# 2. Load manual overrides once during server cold start (using safe absolute path)
+overrides_path = BASE_DIR / "overrides.json"
+try:
+    MANUAL_OVERRIDES = json.loads(overrides_path.read_text())
+except FileNotFoundError:
+    MANUAL_OVERRIDES = {}
 
 @app.get("/")
 async def root():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+    return FileResponse(BASE_DIR / "index.html")
 
 @app.get("/manifest.json")
 async def manifest():
-    return FileResponse(os.path.join(BASE_DIR, "manifest.json"))
+    return FileResponse(BASE_DIR / "manifest.json")
 
 @app.get("/health")
 async def health_check():
@@ -108,18 +117,31 @@ async def get_stream(media_type: str, item_id: str):
 
     async with httpx.AsyncClient() as client:
         tasks = []
-        resolved = await resolve_kitsu_id(client, kitsu_id, ep_num)
         
-        if not resolved:
-            return {"streams": []}
+        # Check manual overrides before querying external APIs
+        if kitsu_id in MANUAL_OVERRIDES:
+            override_data = MANUAL_OVERRIDES[kitsu_id]
+            imdb_id = override_data.get("imdb_id")
+            season = override_data.get("season")
+            offset = override_data.get("offset", 0)
+            
+            calculated_ep = str(int(ep_num) + int(offset))
+            target_id = f"{imdb_id}:{season}:{calculated_ep}"
+            
+            for addon_url in UPSTREAM_ADDONS:
+                tasks.append(fetch_upstream(client, addon_url, "series", target_id))
+        else:
+            # Fallback to AniZip routing if no override exists
+            resolved = await resolve_kitsu_id(client, kitsu_id, ep_num)
+            if resolved and resolved["imdb"]:
+                target_type = resolved["type"]
+                for addon_url in UPSTREAM_ADDONS:
+                    tasks.append(fetch_upstream(client, addon_url, target_type, resolved["imdb"]))
 
-        target_type = resolved["type"]
-        for addon_url in UPSTREAM_ADDONS:
-            if resolved["imdb"]:
-                # Strictly append only the IMDb request task
-                tasks.append(fetch_upstream(client, addon_url, target_type, resolved["imdb"]))
-
-        results = await asyncio.gather(*tasks)
+        if tasks:
+            results = await asyncio.gather(*tasks)
+        else:
+            results = []
 
     combined_streams = []
     for stream_list in results:
