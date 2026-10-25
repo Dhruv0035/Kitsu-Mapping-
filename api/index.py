@@ -23,10 +23,15 @@ UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.sta
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 overrides_path = os.path.join(BASE_DIR, "overrides.json")
+OVERRIDES_FILE_FOUND = False
+
 try:
     with open(overrides_path, "r", encoding="utf-8") as f:
         MANUAL_OVERRIDES = json.load(f)
+        OVERRIDES_FILE_FOUND = True
 except (FileNotFoundError, json.JSONDecodeError):
+    MANUAL_OVERRIDES = {}
+except json.JSONDecodeError:
     MANUAL_OVERRIDES = {}
 
 @app.get("/")
@@ -39,7 +44,13 @@ async def manifest():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "Kitsu Proxy backend is operational"}
+    return {
+        "status": "ok", 
+        "message": "Kitsu Proxy backend is awake",
+        "overrides_file_found": OVERRIDES_FILE_FOUND,
+        "overrides_count": len(MANUAL_OVERRIDES),
+        "addons_count": len(UPSTREAM_ADDONS)
+    }
 
 async def get_mal_id_from_kitsu(client: httpx.AsyncClient, kitsu_id: str):
     """Fetches the MyAnimeList ID directly from Kitsu's official API."""
