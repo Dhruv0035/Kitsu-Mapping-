@@ -10,7 +10,7 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/health",
+      "source": "/health(.*)",
       "destination": "/api/index.py"
     },
     {
