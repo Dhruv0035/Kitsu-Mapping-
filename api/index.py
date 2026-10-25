@@ -34,14 +34,6 @@ except (FileNotFoundError, json.JSONDecodeError):
 except json.JSONDecodeError:
     MANUAL_OVERRIDES = {}
 
-@app.get("/")
-async def root():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
-
-@app.get("/manifest.json")
-async def manifest():
-    return FileResponse(os.path.join(BASE_DIR, "manifest.json"))
-
 @app.get("/health")
 async def health_check():
     return {
