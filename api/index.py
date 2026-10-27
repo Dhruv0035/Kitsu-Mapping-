@@ -153,12 +153,14 @@ async def get_stream(media_type: str, item_id: str):
                 tasks.append(fetch_upstream(client, addon_url, target_type, resolved["imdb"]))
 
     if tasks:
-        results = await asyncio.gather(*tasks)
+        results = await asyncio.gather(*tasks,return_exceptions=True)
     else:
         results = []
 
     combined_streams = []
     for stream_list in results:
+        if isinstance(stream_list, Exception):
+            continue
         for s in stream_list:
             s["name"] = f"[KitsuProxy] {s.get('name', 'HTTP')}"
             combined_streams.append(s)
