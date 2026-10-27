@@ -34,6 +34,17 @@ except (FileNotFoundError, json.JSONDecodeError):
 except json.JSONDecodeError:
     MANUAL_OVERRIDES = {}
 
+http_client = None
+
+def get_client():
+    global http_client
+    # If it doesn't exist yet, or got closed, create a fresh one
+    if http_client is None or http_client.is_closed:
+        # Optional: Add Limits() to prevent pool exhaustion on high traffic
+        limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
+        http_client = httpx.AsyncClient(timeout=15.0, limits=limits)
+    return http_client
+
 @app.get("/health")
 async def health_check():
     return {
@@ -118,33 +129,33 @@ async def get_stream(media_type: str, item_id: str):
     kitsu_id = parts[1]
     ep_num = parts[2] if len(parts) > 2 else "1"
 
-    async with httpx.AsyncClient() as client:
-        tasks = []
+    client = get_client()
+    tasks = []
         
-        # Check manual overrides before querying external APIs
-        if kitsu_id in MANUAL_OVERRIDES:
-            override_data = MANUAL_OVERRIDES[kitsu_id]
-            imdb_id = override_data.get("imdb_id")
-            season = override_data.get("season")
-            offset = override_data.get("offset", 0)
+    # Check manual overrides before querying external APIs
+    if kitsu_id in MANUAL_OVERRIDES:
+        override_data = MANUAL_OVERRIDES[kitsu_id]
+        imdb_id = override_data.get("imdb_id")
+        season = override_data.get("season")
+        offset = override_data.get("offset", 0)
             
-            calculated_ep = str(int(ep_num) + int(offset))
-            target_id = f"{imdb_id}:{season}:{calculated_ep}"
+        calculated_ep = str(int(ep_num) + int(offset))
+        target_id = f"{imdb_id}:{season}:{calculated_ep}"
             
+        for addon_url in UPSTREAM_ADDONS:
+            tasks.append(fetch_upstream(client, addon_url, "series", target_id))
+    else:
+        # Fallback to AniZip routing if no override exists
+        resolved = await resolve_kitsu_id(client, kitsu_id, ep_num)
+        if resolved and resolved.get("imdb"):
+            target_type = resolved["type"]
             for addon_url in UPSTREAM_ADDONS:
-                tasks.append(fetch_upstream(client, addon_url, "series", target_id))
-        else:
-            # Fallback to AniZip routing if no override exists
-            resolved = await resolve_kitsu_id(client, kitsu_id, ep_num)
-            if resolved and resolved.get("imdb"):
-                target_type = resolved["type"]
-                for addon_url in UPSTREAM_ADDONS:
-                    tasks.append(fetch_upstream(client, addon_url, target_type, resolved["imdb"]))
+                tasks.append(fetch_upstream(client, addon_url, target_type, resolved["imdb"]))
 
-        if tasks:
-            results = await asyncio.gather(*tasks)
-        else:
-            results = []
+    if tasks:
+        results = await asyncio.gather(*tasks)
+    else:
+        results = []
 
     combined_streams = []
     for stream_list in results:
