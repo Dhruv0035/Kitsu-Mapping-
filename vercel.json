@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.py": {
-      "includeFiles": "api/overrides.json"
+      "includeFiles": "api/*.{json,html}"
     }
   },
   "routes": [
@@ -11,6 +11,10 @@
     },
     {
       "src": "/health",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/override-helper",
       "dest": "/api/index.py"
     },
     {
