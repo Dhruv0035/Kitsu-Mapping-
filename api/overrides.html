@@ -1,1 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitsu Proxy - Fix Streams</title>
+    <style>
+        :root {
+            --bg-color: #14151a;
+            --surface-color: #21222b;
+            --text-primary: #ffffff;
+            --text-secondary: #9fa2b2;
+            --accent: #8a5aeb; /* Stremio Purple */
+            --accent-hover: #7b4dd6;
+            --code-bg: #0d0d12;
+        }
 
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .instruction-step {
+            margin: 1.5rem 0;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #333;
+            color: #a6accd;
+        }
+
+        code {
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .note {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Fix Missing Streams</h1>
+        
+        <p>You clicked to fix the anime with Kitsu ID: <span class="highlight">{{KITSU_ID}}</span></p>
+
+        <div class="instruction-step">
+            <strong>1. Find the IMDb ID</strong><br>
+            <span style="color: var(--text-secondary); font-size: 0.9rem;">Go to IMDb and search for this anime. Look at the URL (e.g., imdb.com/title/<strong>tt1234567</strong>).</span>
+        </div>
+
+        <div class="instruction-step">
+            <strong>2. Copy this JSON block</strong><br>
+            <span style="color: var(--text-secondary); font-size: 0.9rem;">Copy the code below, replace the placeholder data with the correct IMDb ID and Season, and paste it into your <code>overrides.json</code> file inside the curly braces.</span>
+            
+            <pre><code>"{{KITSU_ID}}": {
+    "imdb_id": "tt1234567",
+    "season": 1,
+    "offset": 0
+}</code></pre>
+        </div>
+
+        <div class="instruction-step">
+            <strong>What is the offset?</strong><br>
+            <span style="color: var(--text-secondary); font-size: 0.9rem;">If Kitsu lists this as episode 1, but IMDb lists it as episode 13 of Season 1, set the offset to <code>12</code>. Otherwise, leave it as <code>0</code>.</span>
+        </div>
+
+        <a href="{{GITHUB_URL}}" class="btn" target="_blank" rel="noopener noreferrer">
+            Edit overrides.json on GitHub
+        </a>
+        
+        <p class="note">Vercel will automatically rebuild your proxy within 30 seconds after you commit the changes to GitHub.</p>
+    </div>
+
+</body>
+</html>
