@@ -42,7 +42,7 @@ def get_client():
     if http_client is None or http_client.is_closed:
         # Optional: Add Limits() to prevent pool exhaustion on high traffic
         limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
-        http_client = httpx.AsyncClient(timeout=15.0, limits=limits)
+        http_client = httpx.AsyncClient(timeout=20.0, limits=limits)
     return http_client
 
 @app.get("/health")
@@ -60,7 +60,7 @@ async def get_mal_id_from_kitsu(client: httpx.AsyncClient, kitsu_id: str):
     try:
         url = f"https://kitsu.io/api/edge/anime/{kitsu_id}/mappings"
         headers = {"Accept": "application/vnd.api+json"}
-        r = await client.get(url, headers=headers, timeout=8.0)
+        r = await client.get(url, headers=headers, timeout=4.0)
         if r.status_code == 200:
             for item in r.json().get("data", []):
                 site = item.get("attributes", {}).get("externalSite", "")
@@ -72,7 +72,7 @@ async def get_mal_id_from_kitsu(client: httpx.AsyncClient, kitsu_id: str):
 
 async def resolve_kitsu_id(client: httpx.AsyncClient, kitsu_id: str, ep_num: str):
     try:
-        resp = await client.get(f"https://api.ani.zip/mappings?kitsu_id={kitsu_id}", timeout=8.0)
+        resp = await client.get(f"https://api.ani.zip/mappings?kitsu_id={kitsu_id}", timeout=4.0)
         data = resp.json() if resp.status_code == 200 else {}
     except Exception:
         data = {}
@@ -81,7 +81,7 @@ async def resolve_kitsu_id(client: httpx.AsyncClient, kitsu_id: str, ep_num: str
         mal_id = await get_mal_id_from_kitsu(client, kitsu_id)
         if mal_id:
             try:
-                resp = await client.get(f"https://api.ani.zip/mappings?mal_id={mal_id}", timeout=8.0)
+                resp = await client.get(f"https://api.ani.zip/mappings?mal_id={mal_id}", timeout=4.0)
                 data = resp.json() if resp.status_code == 200 else {}
             except Exception:
                 data = {}
@@ -113,7 +113,7 @@ async def resolve_kitsu_id(client: httpx.AsyncClient, kitsu_id: str, ep_num: str
 async def fetch_upstream(client: httpx.AsyncClient, base_url: str, media_type: str, target_id: str):
     url = f"{base_url}/stream/{media_type}/{target_id}.json"
     try:
-        r = await client.get(url, timeout=8.0)
+        r = await client.get(url, timeout=20.0)
         if r.status_code == 200:
             return r.json().get("streams", [])
     except Exception:
