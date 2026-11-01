@@ -3,9 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import asyncio
 import os
-from pathlib import Path
 from fastapi.responses import HTMLResponse
-from fastapi.responses import FileResponse
 import json
 
 # 1. App Initialization & Middleware
@@ -20,9 +18,17 @@ app.add_middleware(
 
 # 2. Global Variables & Environment
 UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
+VERCEL_REPO_OWNER = os.getenv("VERCEL_GIT_REPO_OWNER")
+VERCEL_REPO_SLUG = os.getenv("VERCEL_GIT_REPO_SLUG")
+VERCEL_BRANCH = os.getenv("VERCEL_GIT_COMMIT_REF", "main")
+VERCEL_DOMAIN = os.getenv("VERCEL_PROJECT_PRODUCTION_URL") or os.getenv("VERCEL_URL") or "localhost:8000"
+
+BASE_URL = f"http://{VERCEL_DOMAIN}" if "localhost" in VERCEL_DOMAIN else f"https://{VERCEL_DOMAIN}"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 # 3. Load Files into Memory
+html_path = os.path.join(BASE_DIR, "helper.html")
 overrides_path = os.path.join(BASE_DIR, "overrides.json")
 OVERRIDES_FILE_FOUND = False
 
@@ -34,6 +40,12 @@ except (FileNotFoundError, json.JSONDecodeError):
     MANUAL_OVERRIDES = {}
 except json.JSONDecodeError:
     MANUAL_OVERRIDES = {}
+
+try:
+    with open(html_path, "r", encoding="utf-8") as f:
+        HELPER_TEMPLATE = f.read()
+except FileNotFoundError:
+    HELPER_TEMPLATE = "<h1>Error: helper.html not found</h1>"
 
 # 4. HTTPX Client Setup (Connection Pooling)
 http_client = None
@@ -123,6 +135,16 @@ async def health_check():
         "addons_count": len(UPSTREAM_ADDONS)
     }
 
+@app.get("/override-helper", response_class=HTMLResponse)
+async def override_helper(kitsu_id: str = ""):
+    if VERCEL_REPO_OWNER and VERCEL_REPO_SLUG:
+        github_url = f"https://github.com/{VERCEL_REPO_OWNER}/{VERCEL_REPO_SLUG}/blob/{VERCEL_BRANCH}/api/overrides.json"
+    else:
+        github_url = "https://github.com"
+
+    html_content = HELPER_TEMPLATE.replace("{{KITSU_ID}}", kitsu_id).replace("{{GITHUB_URL}}", github_url)
+    return html_content
+
 @app.get("/stream/{media_type}/{item_id}.json")
 async def get_stream(media_type: str, item_id: str):
     parts = item_id.split(":")
@@ -160,7 +182,13 @@ async def get_stream(media_type: str, item_id: str):
     else:
         results = []
 
-    combined_streams = []
+    helper_stream = {
+        "name": "[🔧 Fix ID]",
+        "title": f"Missing or incorrect streams?\nClick to fix Kitsu ID: {kitsu_id}",
+        "externalUrl": f"{BASE_URL}/override-helper?kitsu_id={kitsu_id}"
+    }
+
+    combined_streams = [helper_stream]
     for stream_list in results:
         if isinstance(stream_list, Exception):
             continue
