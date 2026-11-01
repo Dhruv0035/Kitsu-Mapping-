@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.responses import FileResponse
 import json
 
+# 1. App Initialization & Middleware
 app = FastAPI()
 
 app.add_middleware(
@@ -17,11 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Fetch securely from Vercel Environment Variables
+# 2. Global Variables & Environment
 UPSTREAM_ADDONS = [val.rstrip("/") for key, val in os.environ.items() if key.startswith("ADDON_")]
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# 3. Load Files into Memory
 overrides_path = os.path.join(BASE_DIR, "overrides.json")
 OVERRIDES_FILE_FOUND = False
 
@@ -34,6 +35,7 @@ except (FileNotFoundError, json.JSONDecodeError):
 except json.JSONDecodeError:
     MANUAL_OVERRIDES = {}
 
+# 4. HTTPX Client Setup (Connection Pooling)
 http_client = None
 
 def get_client():
@@ -44,17 +46,8 @@ def get_client():
         limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
         http_client = httpx.AsyncClient(timeout=20.0, limits=limits)
     return http_client
-
-@app.get("/health")
-async def health_check():
-    return {
-        "status": "ok", 
-        "message": "Kitsu Proxy backend is awake",
-        "overrides_file_found": OVERRIDES_FILE_FOUND,
-        "overrides_count": len(MANUAL_OVERRIDES),
-        "addons_count": len(UPSTREAM_ADDONS)
-    }
-
+    
+# 5. Helper Functions
 async def get_mal_id_from_kitsu(client: httpx.AsyncClient, kitsu_id: str):
     """Fetches the MyAnimeList ID directly from Kitsu's official API."""
     try:
@@ -119,6 +112,16 @@ async def fetch_upstream(client: httpx.AsyncClient, base_url: str, media_type: s
     except Exception:
         pass
     return []
+# 6. Endpoints
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok", 
+        "message": "Kitsu Proxy backend is awake",
+        "overrides_file_found": OVERRIDES_FILE_FOUND,
+        "overrides_count": len(MANUAL_OVERRIDES),
+        "addons_count": len(UPSTREAM_ADDONS)
+    }
 
 @app.get("/stream/{media_type}/{item_id}.json")
 async def get_stream(media_type: str, item_id: str):
