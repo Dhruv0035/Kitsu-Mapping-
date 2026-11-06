@@ -138,7 +138,7 @@ async def health_check():
 @app.get("/override-helper", response_class=HTMLResponse)
 async def override_helper(kitsu_id: str = ""):
     if VERCEL_REPO_OWNER and VERCEL_REPO_SLUG:
-        github_url = f"https://github.com/{VERCEL_REPO_OWNER}/{VERCEL_REPO_SLUG}/blob/{VERCEL_BRANCH}/api/overrides.json"
+        github_url = f"https://github.com/{VERCEL_REPO_OWNER}/{VERCEL_REPO_SLUG}/edit/{VERCEL_BRANCH}/api/overrides.json"
     else:
         github_url = "https://github.com"
 
