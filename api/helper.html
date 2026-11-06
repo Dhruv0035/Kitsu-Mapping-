@@ -58,7 +58,7 @@
             overflow-x: auto;
             border: 1px solid #333;
             color: #a6accd;
-            margin-bottom: 0; /* Removed bottom margin so the button spaces cleanly */
+            margin-bottom: 0;
         }
 
         code {
@@ -66,7 +66,6 @@
             font-size: 0.9rem;
         }
 
-        /* Upgraded, larger, free-spaced copy button */
         #copy-btn {
             background-color: #2a2b36;
             color: #ffffff;
@@ -136,7 +135,6 @@
     "season": 1,
     "offset": 0
 }</code></pre>
-            <!-- Button moved below the code, styled bigger, spaced freely -->
             <button id="copy-btn" onclick="copyJSON()">Copy</button>
         </div>
 
@@ -152,7 +150,6 @@
         <p class="note">Vercel will automatically rebuild your proxy within 30 seconds after you commit the changes to GitHub.</p>
     </div>
 
-    <!-- Updated Javascript to reset text to "Copy" -->
     <script>
         function copyJSON() {
             var codeToCopy = document.getElementById("json-block").innerText;
